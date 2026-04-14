@@ -1,0 +1,109 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: quotes
+    // Document ID: auto-generated
+    // Fields:
+    //   - name: string (required, < 100 chars)
+    //   - phone: string (required, < 20 chars)
+    //   - service: string (required, < 100 chars)
+    //   - details: string (optional, < 2000 chars)
+    //   - createdAt: timestamp (required)
+    //   - status: string (required, enum: ['pending', 'contacted', 'completed'])
+    //
+    // Collection: portfolios
+    // Document ID: auto-generated
+    // Fields:
+    //   - title: string (required, < 200 chars)
+    //   - description: string (required, < 5000 chars)
+    //   - imageUrl: string (required, valid URL)
+    //   - serviceType: string (required, < 100 chars)
+    //   - createdAt: timestamp (required)
+    //
+    // ===============================================================
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+    
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      // The first admin is bootstrapped via email verification
+      return isAuthenticated() && 
+        (request.auth.token.email == "eslehoon7@gmail.com" && request.auth.token.email_verified == true);
+    }
+
+    function hasRequiredFields(fields) {
+      return request.resource.data.keys().hasAll(fields);
+    }
+
+    function isValidString(field, minLen, maxLen) {
+      return request.resource.data[field] is string &&
+             request.resource.data[field].size() >= minLen &&
+             request.resource.data[field].size() <= maxLen;
+    }
+    
+    function isValidOptionalString(field, minLen, maxLen) {
+      return !('field' in request.resource.data) ||
+             (request.resource.data[field] is string &&
+              request.resource.data[field].size() >= minLen &&
+              request.resource.data[field].size() <= maxLen);
+    }
+
+    function isValidUrl(url) {
+      return url is string && (url.matches("^https://.*") || url.matches("^http://.*"));
+    }
+
+    // ===============================================================
+    // Domain Validators
+    // ===============================================================
+
+    function isValidQuote(data) {
+      return hasRequiredFields(['name', 'phone', 'service', 'createdAt', 'status']) &&
+             isValidString('name', 1, 100) &&
+             isValidString('phone', 1, 20) &&
+             isValidString('service', 1, 100) &&
+             isValidOptionalString('details', 0, 2000) &&
+             request.resource.data.createdAt is timestamp &&
+             request.resource.data.status in ['pending', 'contacted', 'completed'];
+    }
+
+    function isValidPortfolio(data) {
+      return hasRequiredFields(['title', 'description', 'imageUrl', 'serviceType', 'createdAt']) &&
+             isValidString('title', 1, 200) &&
+             isValidString('description', 1, 5000) &&
+             isValidUrl(request.resource.data.imageUrl) &&
+             isValidString('serviceType', 1, 100) &&
+             request.resource.data.createdAt is timestamp;
+    }
+
+    // ===============================================================
+    // Rules
+    // ===============================================================
+
+    match /quotes/{quoteId} {
+      // Anyone can submit a quote inquiry
+      allow create: if isValidQuote(request.resource.data);
+      // Only admin can read, update, or delete quotes
+      allow read, delete: if isAdmin();
+      allow update: if isAdmin() && isValidQuote(request.resource.data);
+    }
+
+    match /portfolios/{portfolioId} {
+      // Anyone can read portfolios
+      allow read: if true;
+      // Only admin can create, update, or delete portfolios
+      allow create: if isAdmin() && isValidPortfolio(request.resource.data);
+      allow update: if isAdmin() && isValidPortfolio(request.resource.data);
+      allow delete: if isAdmin();
+    }
+  }
+}

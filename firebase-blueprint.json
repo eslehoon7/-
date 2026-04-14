@@ -1,0 +1,81 @@
+{
+  "entities": {
+    "Quote": {
+      "title": "Quote",
+      "description": "A customer inquiry for a quote.",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Customer name"
+        },
+        "phone": {
+          "type": "string",
+          "description": "Customer phone number"
+        },
+        "service": {
+          "type": "string",
+          "description": "Requested service type"
+        },
+        "details": {
+          "type": "string",
+          "description": "Additional details provided by the customer"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp of when the inquiry was submitted"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["pending", "contacted", "completed"],
+          "description": "Status of the inquiry"
+        }
+      },
+      "required": ["name", "phone", "service", "createdAt", "status"]
+    },
+    "Portfolio": {
+      "title": "Portfolio",
+      "description": "A portfolio item showcasing a completed service.",
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string",
+          "description": "Title of the portfolio item"
+        },
+        "description": {
+          "type": "string",
+          "description": "Description of the work done"
+        },
+        "imageUrl": {
+          "type": "string",
+          "description": "URL of the uploaded image"
+        },
+        "serviceType": {
+          "type": "string",
+          "description": "Type of service performed"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp of when the portfolio item was created"
+        }
+      },
+      "required": ["title", "description", "imageUrl", "serviceType", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/quotes/{quoteId}": {
+      "schema": {
+        "$ref": "#/entities/Quote"
+      },
+      "description": "Stores customer quote inquiries."
+    },
+    "/portfolios/{portfolioId}": {
+      "schema": {
+        "$ref": "#/entities/Portfolio"
+      },
+      "description": "Stores portfolio items."
+    }
+  }
+}
