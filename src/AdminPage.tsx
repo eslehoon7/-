@@ -129,7 +129,7 @@ export default function AdminPage() {
       {/* Sidebar */}
       <aside className="w-full md:w-64 bg-slate-900 text-white flex flex-col">
         <div className="p-6 border-b border-slate-800">
-          <img src={logoImg} alt="로고" className="h-10 object-contain mb-4" referrerPolicy="no-referrer" />
+          <img src="https://drive.google.com/uc?export=view&id=1zZwAUL76C3kZTUIO8LevVj8mtmWGBpas" alt="로고" className="h-10 object-contain mb-4" referrerPolicy="no-referrer" />
           <p className="text-sm text-slate-400">관리자 대시보드</p>
         </div>
         <nav className="flex-1 p-4 space-y-2">

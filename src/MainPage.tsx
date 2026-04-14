@@ -81,7 +81,7 @@ export default function MainPage() {
       <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled ? 'bg-white/70 backdrop-blur-md border-b border-slate-100' : 'bg-transparent border-b border-transparent'}`}>
         <div className="max-w-6xl mx-auto px-6 h-[60px] flex items-center justify-between">
           <a href="#" className="flex items-center gap-2">
-            <img src={logoImg} alt="꼬마철거 로고" className="h-12 w-auto object-contain" referrerPolicy="no-referrer" />
+            <img src="https://drive.google.com/uc?export=view&id=1zZwAUL76C3kZTUIO8LevVj8mtmWGBpas" alt="꼬마철거 로고" className="h-12 w-auto object-contain" referrerPolicy="no-referrer" />
           </a>
           <div className={`hidden md:flex items-center gap-8 text-base font-medium transition-colors duration-300 ${isScrolled ? 'text-slate-600' : 'text-white/90'}`}>
             <div className="relative group">
@@ -350,7 +350,7 @@ export default function MainPage() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
             <div className="md:col-span-2 space-y-4">
               <a href="#" className="flex items-center gap-2 inline-block">
-                <img src={logoImg} alt="꼬마철거 로고" className="h-10 w-auto object-contain grayscale hover:grayscale-0 transition-all" referrerPolicy="no-referrer" />
+                <img src="https://drive.google.com/uc?export=view&id=1zZwAUL76C3kZTUIO8LevVj8mtmWGBpas" alt="꼬마철거 로고" className="h-10 w-auto object-contain grayscale hover:grayscale-0 transition-all" referrerPolicy="no-referrer" />
               </a>
               <p className="text-slate-500 text-sm leading-relaxed max-w-sm">
                 새로운 시작을 위한 가장 완벽한 비움.<br />
