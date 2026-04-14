@@ -94,7 +94,7 @@ export default function MainPage() {
               </div>
             </div>
             <a href="#features" className="hover:text-orange-500 transition-colors">특징</a>
-            <a href="#quote" className="hover:text-orange-500 transition-colors">견적문의</a>
+            <a href="#contact" className="hover:text-orange-500 transition-colors">연락하기</a>
           </div>
           <a href="#quote" className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-medium transition-colors duration-300 ${isScrolled ? 'bg-slate-900 text-white hover:bg-slate-800' : 'bg-white text-slate-900 hover:bg-slate-100'}`}>
             <ClipboardList className="w-4 h-4" />
@@ -149,7 +149,7 @@ export default function MainPage() {
               { title: "원상복구 철거", icon: <RefreshCw className="w-8 h-8 text-[#1e293b]" /> },
               { title: "폐기물 처리", icon: <Truck className="w-8 h-8 text-[#1e293b]" /> }
             ].map((card, i) => (
-              <div key={i} className="bg-white rounded-xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.1)] p-6 text-center group hover:-translate-y-1 transition-transform cursor-pointer border border-slate-100">
+              <div key={i} onClick={() => document.getElementById('services')?.scrollIntoView({ behavior: 'smooth' })} className="bg-white rounded-xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.1)] p-6 text-center group hover:-translate-y-1 transition-transform cursor-pointer border border-slate-100">
                 <div className="w-16 h-16 mx-auto rounded-full border-2 border-orange-500 flex items-center justify-center mb-4 group-hover:bg-orange-50 transition-colors">
                   {card.icon}
                 </div>
@@ -171,7 +171,7 @@ export default function MainPage() {
             { title: "원상복구 철거", icon: <RefreshCw className="w-6 h-6 text-[#1e293b]" /> },
             { title: "폐기물 처리", icon: <Truck className="w-6 h-6 text-[#1e293b]" /> }
           ].map((card, i) => (
-            <div key={i} className="bg-white rounded-xl shadow-sm p-4 text-center border border-slate-100">
+            <div key={i} onClick={() => document.getElementById('services')?.scrollIntoView({ behavior: 'smooth' })} className="bg-white rounded-xl shadow-sm p-4 text-center border border-slate-100 cursor-pointer hover:shadow-md transition-shadow">
               <div className="w-12 h-12 mx-auto rounded-full border-2 border-orange-500 flex items-center justify-center mb-3">
                 {card.icon}
               </div>
@@ -372,7 +372,7 @@ export default function MainPage() {
               <h3 className="font-bold text-slate-900 mb-4">빠른 링크</h3>
               <ul className="space-y-3 text-sm text-slate-500">
                 <li><a href="#features" className="hover:text-orange-500 transition-colors">특징</a></li>
-                <li><a href="#quote" className="hover:text-orange-500 transition-colors">견적문의</a></li>
+                <li><a href="#contact" className="hover:text-orange-500 transition-colors">연락하기</a></li>
               </ul>
             </div>
           </div>
