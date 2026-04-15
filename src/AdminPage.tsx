@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { auth, db } from './firebase';
+import { auth, db, storage } from './firebase';
 import { signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from 'firebase/auth';
 import { collection, query, orderBy, onSnapshot, addDoc, serverTimestamp, doc, deleteDoc } from 'firebase/firestore';
-import { LogOut, Trash2, Plus, Image as ImageIcon, FileText, Phone, Calendar, CheckCircle, Home } from 'lucide-react';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { LogOut, Trash2, Plus, Image as ImageIcon, FileText, Phone, Calendar, CheckCircle, Home, Loader2 } from 'lucide-react';
 
 export default function AdminPage() {
   const [user, setUser] = useState<any>(null);
@@ -18,9 +19,10 @@ export default function AdminPage() {
   const [newPortfolio, setNewPortfolio] = useState({
     title: '',
     description: '',
-    imageUrl: '',
     serviceType: '인테리어 철거'
   });
+  const [imageFiles, setImageFiles] = useState<File[]>([]);
+  const [isUploading, setIsUploading] = useState(false);
 
   const navigate = useNavigate();
 
@@ -80,18 +82,50 @@ export default function AdminPage() {
     navigate('/');
   };
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      const filesArray = Array.from(e.target.files);
+      if (filesArray.length > 10) {
+        alert("이미지는 최대 10장까지만 업로드 가능합니다.");
+        setImageFiles(filesArray.slice(0, 10));
+      } else {
+        setImageFiles(filesArray);
+      }
+    }
+  };
+
   const handleAddPortfolio = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (imageFiles.length === 0) {
+      alert("최소 1장의 이미지를 선택해주세요.");
+      return;
+    }
+
+    setIsUploading(true);
     try {
+      const imageUrls: string[] = [];
+      
+      for (const file of imageFiles) {
+        const fileRef = ref(storage, `portfolios/${Date.now()}_${file.name}`);
+        await uploadBytes(fileRef, file);
+        const url = await getDownloadURL(fileRef);
+        imageUrls.push(url);
+      }
+
       await addDoc(collection(db, 'portfolios'), {
         ...newPortfolio,
+        imageUrls,
         createdAt: serverTimestamp()
       });
-      setNewPortfolio({ title: '', description: '', imageUrl: '', serviceType: '인테리어 철거' });
+      
+      setNewPortfolio({ title: '', description: '', serviceType: '인테리어 철거' });
+      setImageFiles([]);
       alert("시공사례가 추가되었습니다.");
     } catch (error) {
       console.error("Error adding portfolio:", error);
       alert("추가 중 오류가 발생했습니다.");
+    } finally {
+      setIsUploading(false);
     }
   };
 
@@ -307,15 +341,17 @@ export default function AdminPage() {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">이미지 URL</label>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">이미지 업로드 (최대 10장)</label>
                     <input 
-                      type="url" 
-                      required
-                      value={newPortfolio.imageUrl}
-                      onChange={e => setNewPortfolio({...newPortfolio, imageUrl: e.target.value})}
-                      className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-orange-500"
-                      placeholder="https://..."
+                      type="file" 
+                      multiple
+                      accept="image/*"
+                      onChange={handleFileChange}
+                      className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-orange-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-orange-50 file:text-orange-600 hover:file:bg-orange-100"
                     />
+                    {imageFiles.length > 0 && (
+                      <p className="text-sm text-slate-500 mt-2">선택된 파일: {imageFiles.length}장</p>
+                    )}
                   </div>
                 </div>
                 <div className="space-y-4 flex flex-col">
@@ -329,8 +365,8 @@ export default function AdminPage() {
                       placeholder="시공 과정 및 결과에 대한 설명을 입력하세요."
                     ></textarea>
                   </div>
-                  <button type="submit" className="w-full bg-orange-500 text-white py-3 rounded-xl font-bold hover:bg-orange-600 transition-colors">
-                    등록하기
+                  <button type="submit" disabled={isUploading} className="w-full bg-orange-500 text-white py-3 rounded-xl font-bold hover:bg-orange-600 transition-colors disabled:opacity-50 flex items-center justify-center gap-2">
+                    {isUploading ? <><Loader2 className="w-5 h-5 animate-spin" /> 업로드 중...</> : '등록하기'}
                   </button>
                 </div>
               </form>
@@ -340,7 +376,12 @@ export default function AdminPage() {
               {portfolios.map(item => (
                 <div key={item.id} className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden group">
                   <div className="h-48 bg-slate-100 relative">
-                    <img src={item.imageUrl} alt={item.title} className="w-full h-full object-cover" />
+                    <img src={item.imageUrls?.[0] || item.imageUrl} alt={item.title} className="w-full h-full object-cover" />
+                    {item.imageUrls && item.imageUrls.length > 1 && (
+                      <div className="absolute bottom-2 right-2 bg-black/60 text-white text-xs px-2 py-1 rounded-md">
+                        +{item.imageUrls.length - 1}
+                      </div>
+                    )}
                     <button 
                       onClick={() => handleDeletePortfolio(item.id)}
                       className="absolute top-3 right-3 bg-white/90 text-red-500 p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-50"

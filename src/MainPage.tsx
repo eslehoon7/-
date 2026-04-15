@@ -236,12 +236,31 @@ export default function MainPage() {
                     {portfolio.serviceType}
                   </div>
                   <div className="absolute inset-0 bg-black/10 group-hover:bg-transparent transition-colors z-10"></div>
-                  <img 
-                    src={portfolio.imageUrl} 
-                    alt={portfolio.title} 
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                    referrerPolicy="no-referrer"
-                  />
+                  <div className="flex overflow-x-auto snap-x snap-mandatory hide-scrollbar w-full h-full">
+                    {portfolio.imageUrls && portfolio.imageUrls.length > 0 ? (
+                      portfolio.imageUrls.map((url: string, idx: number) => (
+                        <img 
+                          key={idx}
+                          src={url} 
+                          alt={`${portfolio.title} - 이미지 ${idx + 1}`} 
+                          className="w-full h-full object-cover flex-shrink-0 snap-center group-hover:scale-105 transition-transform duration-700"
+                          referrerPolicy="no-referrer"
+                        />
+                      ))
+                    ) : (
+                      <img 
+                        src={portfolio.imageUrl} 
+                        alt={portfolio.title} 
+                        className="w-full h-full object-cover flex-shrink-0 snap-center group-hover:scale-105 transition-transform duration-700"
+                        referrerPolicy="no-referrer"
+                      />
+                    )}
+                  </div>
+                  {portfolio.imageUrls && portfolio.imageUrls.length > 1 && (
+                    <div className="absolute bottom-3 right-3 z-20 bg-black/60 text-white text-xs font-bold px-2 py-1 rounded-md backdrop-blur-sm">
+                      1 / {portfolio.imageUrls.length}
+                    </div>
+                  )}
                 </div>
                 <div className="p-6 flex-1 flex flex-col">
                   <h3 className="text-xl font-bold text-slate-900 mb-3 line-clamp-1">{portfolio.title}</h3>
