@@ -12,6 +12,7 @@ import { collection, addDoc, serverTimestamp, query, orderBy, onSnapshot } from 
 export default function MainPage() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [portfolios, setPortfolios] = useState<any[]>([]);
+  const [mainImageUrl, setMainImageUrl] = useState<string>("https://images.unsplash.com/photo-1572295727871-7638149ea3d7?q=80&w=2070&auto=format&fit=crop");
   
   // Quote Form State
   const [quoteForm, setQuoteForm] = useState({
@@ -36,10 +37,23 @@ export default function MainPage() {
 
   useEffect(() => {
     const q = query(collection(db, 'portfolios'), orderBy('createdAt', 'desc'));
-    const unsubscribe = onSnapshot(q, (snapshot) => {
+    const unsubscribePortfolios = onSnapshot(q, (snapshot) => {
       setPortfolios(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
     });
-    return () => unsubscribe();
+
+    import('firebase/firestore').then(({ doc }) => {
+      const unsubscribeMainImage = onSnapshot(doc(db, 'siteConfig', 'mainImage'), (docSnap) => {
+        if (docSnap.exists() && docSnap.data().url) {
+          setMainImageUrl(docSnap.data().url);
+        }
+      });
+      return () => {
+        unsubscribePortfolios();
+        unsubscribeMainImage();
+      };
+    });
+
+    return () => unsubscribePortfolios();
   }, []);
 
   const handleQuoteSubmit = async (e: React.FormEvent) => {
@@ -108,7 +122,7 @@ export default function MainPage() {
         {/* Background Image */}
         <div className="absolute inset-0 z-0">
           <img 
-            src="https://images.unsplash.com/photo-1572295727871-7638149ea3d7?q=80&w=2070&auto=format&fit=crop" 
+            src={mainImageUrl} 
             alt="철거 현장" 
             className="w-full h-full object-cover opacity-40"
             referrerPolicy="no-referrer"

@@ -9,11 +9,16 @@ import { LogOut, Trash2, Plus, Image as ImageIcon, FileText, Phone, Calendar, Ch
 export default function AdminPage() {
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'quotes' | 'portfolios'>('quotes');
+  const [activeTab, setActiveTab] = useState<'quotes' | 'portfolios' | 'mainImage'>('quotes');
   
   const [quotes, setQuotes] = useState<any[]>([]);
   const [portfolios, setPortfolios] = useState<any[]>([]);
   const [selectedQuote, setSelectedQuote] = useState<any>(null);
+  
+  // Main Image State
+  const [mainImageUrl, setMainImageUrl] = useState<string>('');
+  const [newMainImageFile, setNewMainImageFile] = useState<File | null>(null);
+  const [isMainImageUploading, setIsMainImageUploading] = useState(false);
 
   // Portfolio Form
   const [newPortfolio, setNewPortfolio] = useState({
@@ -53,9 +58,19 @@ export default function AdminPage() {
       console.error("Error fetching portfolios:", error);
     });
 
+    // Fetch Main Image
+    const unsubMainImage = onSnapshot(doc(db, 'siteConfig', 'mainImage'), (docSnap) => {
+      if (docSnap.exists()) {
+        setMainImageUrl(docSnap.data().url);
+      }
+    }, (error) => {
+      console.error("Error fetching main image:", error);
+    });
+
     return () => {
       unsubQuotes();
       unsubPortfolios();
+      unsubMainImage();
     };
   }, [user]);
 
@@ -94,11 +109,62 @@ export default function AdminPage() {
     }
   };
 
+  const handleMainImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setNewMainImageFile(e.target.files[0]);
+    }
+  };
+
+  const handleUpdateMainImage = async () => {
+    if (!newMainImageFile) {
+      alert("변경할 이미지를 선택해주세요.");
+      return;
+    }
+
+    if (newMainImageFile.size > 5 * 1024 * 1024) {
+      alert("파일 크기가 너무 큽니다. (최대 5MB)");
+      return;
+    }
+
+    setIsMainImageUploading(true);
+    try {
+      const fileRef = ref(storage, `siteConfig/mainImage_${Date.now()}_${newMainImageFile.name}`);
+      
+      await Promise.race([
+        uploadBytes(fileRef, newMainImageFile),
+        new Promise((_, reject) => setTimeout(() => reject(new Error('업로드 시간 초과')), 15000))
+      ]);
+      
+      const url = await getDownloadURL(fileRef);
+      
+      // Update Firestore document
+      import('firebase/firestore').then(({ setDoc }) => {
+        setDoc(doc(db, 'siteConfig', 'mainImage'), { url, updatedAt: serverTimestamp() });
+      });
+
+      setNewMainImageFile(null);
+      alert("메인 이미지가 성공적으로 변경되었습니다.");
+    } catch (error: any) {
+      console.error("Error updating main image:", error);
+      alert(`업로드 실패: ${error.message}`);
+    } finally {
+      setIsMainImageUploading(false);
+    }
+  };
+
   const handleAddPortfolio = async (e: React.FormEvent) => {
     e.preventDefault();
     if (imageFiles.length === 0) {
       alert("최소 1장의 이미지를 선택해주세요.");
       return;
+    }
+
+    // 파일 용량 체크 (장당 5MB 제한)
+    for (const file of imageFiles) {
+      if (file.size > 5 * 1024 * 1024) {
+        alert(`파일 크기가 너무 큽니다: ${file.name}\n(사진 1장당 최대 5MB까지 업로드 가능합니다)`);
+        return;
+      }
     }
 
     setIsUploading(true);
@@ -107,7 +173,13 @@ export default function AdminPage() {
       
       for (const file of imageFiles) {
         const fileRef = ref(storage, `portfolios/${Date.now()}_${file.name}`);
-        await uploadBytes(fileRef, file);
+        
+        // 15초 타임아웃 설정 (무한 로딩 방지)
+        await Promise.race([
+          uploadBytes(fileRef, file),
+          new Promise((_, reject) => setTimeout(() => reject(new Error('업로드 시간 초과')), 15000))
+        ]);
+        
         const url = await getDownloadURL(fileRef);
         imageUrls.push(url);
       }
@@ -121,9 +193,9 @@ export default function AdminPage() {
       setNewPortfolio({ title: '', description: '', serviceType: '인테리어 철거' });
       setImageFiles([]);
       alert("시공사례가 추가되었습니다.");
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error adding portfolio:", error);
-      alert("추가 중 오류가 발생했습니다.");
+      alert(`업로드 실패: ${error.message}\n\n[해결방법]\n1. Firebase Storage(저장소)가 '시작하기'로 활성화되었는지 확인해주세요.\n2. 사진 용량이 너무 크거나 인터넷 연결이 불안정할 수 있습니다.`);
     } finally {
       setIsUploading(false);
     }
@@ -187,6 +259,13 @@ export default function AdminPage() {
           >
             <ImageIcon className="w-5 h-5" />
             시공사례 관리
+          </button>
+          <button 
+            onClick={() => setActiveTab('mainImage')}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-colors ${activeTab === 'mainImage' ? 'bg-orange-500 text-white' : 'text-slate-300 hover:bg-slate-800'}`}
+          >
+            <ImageIcon className="w-5 h-5" />
+            메인화면 관리
           </button>
         </nav>
         <div className="p-4 border-t border-slate-800 space-y-2">
@@ -398,6 +477,50 @@ export default function AdminPage() {
                   </div>
                 </div>
               ))}
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'mainImage' && (
+          <div className="max-w-3xl mx-auto">
+            <h2 className="text-2xl font-bold text-slate-900 mb-6">메인화면 관리</h2>
+            
+            <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-200">
+              <h3 className="font-bold text-slate-900 mb-6 text-lg">홈페이지 대표 이미지 변경</h3>
+              
+              <div className="space-y-8">
+                <div>
+                  <p className="text-sm font-medium text-slate-700 mb-3">현재 적용된 이미지</p>
+                  <div className="w-full h-64 bg-slate-100 rounded-xl overflow-hidden border border-slate-200">
+                    {mainImageUrl ? (
+                      <img src={mainImageUrl} alt="현재 메인 이미지" className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-slate-400">
+                        기본 이미지가 적용되어 있습니다.
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div className="pt-6 border-t border-slate-100">
+                  <label className="block text-sm font-medium text-slate-700 mb-2">새로운 이미지 업로드</label>
+                  <input 
+                    type="file" 
+                    accept="image/*"
+                    onChange={handleMainImageChange}
+                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-orange-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-orange-50 file:text-orange-600 hover:file:bg-orange-100"
+                  />
+                  <p className="text-xs text-slate-500 mt-2">권장 해상도: 1920x1080 픽셀 이상 (가로형 이미지)</p>
+                </div>
+
+                <button 
+                  onClick={handleUpdateMainImage}
+                  disabled={isMainImageUploading || !newMainImageFile}
+                  className="w-full bg-slate-900 text-white py-4 rounded-xl font-bold hover:bg-slate-800 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                >
+                  {isMainImageUploading ? <><Loader2 className="w-5 h-5 animate-spin" /> 업로드 중...</> : '메인 이미지 변경하기'}
+                </button>
+              </div>
             </div>
           </div>
         )}
