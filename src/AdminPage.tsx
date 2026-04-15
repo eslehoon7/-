@@ -4,7 +4,6 @@ import { auth, db } from './firebase';
 import { signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from 'firebase/auth';
 import { collection, query, orderBy, onSnapshot, addDoc, serverTimestamp, doc, deleteDoc } from 'firebase/firestore';
 import { LogOut, Trash2, Plus, Image as ImageIcon, FileText, Phone, Calendar, CheckCircle, Home } from 'lucide-react';
-import logoImg from "./assets/logo.png";
 
 export default function AdminPage() {
   const [user, setUser] = useState<any>(null);
@@ -129,7 +128,7 @@ export default function AdminPage() {
       {/* Sidebar */}
       <aside className="w-full md:w-64 bg-slate-900 text-white flex flex-col">
         <div className="p-6 border-b border-slate-800">
-          <img src="https://drive.google.com/uc?export=view&id=1zZwAUL76C3kZTUIO8LevVj8mtmWGBpas" alt="로고" className="h-10 object-contain mb-4" referrerPolicy="no-referrer" />
+          <img src="/logo.png" alt="로고" className="h-10 object-contain mb-4" />
           <p className="text-sm text-slate-400">관리자 대시보드</p>
         </div>
         <nav className="flex-1 p-4 space-y-2">
