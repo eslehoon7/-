@@ -111,7 +111,7 @@ export default function AdminPage() {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6">
         <div className="bg-white p-8 rounded-2xl shadow-xl max-w-md w-full text-center">
-          <img src="/logo.png" alt="로고" className="h-12 mx-auto mb-6" />
+          <img src="https://i.postimg.cc/4ddy9L3L/kkomacheolgeo-logo.png" alt="로고" className="h-12 mx-auto mb-6" />
           <h1 className="text-2xl font-bold text-slate-900 mb-2">관리자 로그인</h1>
           <p className="text-slate-500 mb-8">관리자 권한이 있는 계정으로 로그인해주세요.</p>
           <button 
@@ -136,7 +136,7 @@ export default function AdminPage() {
       {/* Sidebar */}
       <aside className="w-full md:w-64 bg-slate-900 text-white flex flex-col">
         <div className="p-6 border-b border-slate-800">
-          <img src="/logo.png" alt="로고" className="h-10 object-contain mb-4" />
+          <img src="https://i.postimg.cc/4ddy9L3L/kkomacheolgeo-logo.png" alt="로고" className="h-10 object-contain mb-4" />
           <p className="text-sm text-slate-400">관리자 대시보드</p>
         </div>
         <nav className="flex-1 p-4 space-y-2">
