@@ -39,21 +39,28 @@ export default function MainPage() {
     const q = query(collection(db, 'portfolios'), orderBy('createdAt', 'desc'));
     const unsubscribePortfolios = onSnapshot(q, (snapshot) => {
       setPortfolios(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+    }, (error) => {
+      console.error("Error fetching portfolios in MainPage:", error);
     });
 
+    let unsubscribeMainImage: () => void;
+    
     import('firebase/firestore').then(({ doc }) => {
-      const unsubscribeMainImage = onSnapshot(doc(db, 'siteConfig', 'mainImage'), (docSnap) => {
+      unsubscribeMainImage = onSnapshot(doc(db, 'siteConfig', 'mainImage'), (docSnap) => {
         if (docSnap.exists() && docSnap.data().url) {
           setMainImageUrl(docSnap.data().url);
         }
+      }, (error) => {
+        console.error("Error fetching main image in MainPage:", error);
       });
-      return () => {
-        unsubscribePortfolios();
-        unsubscribeMainImage();
-      };
     });
 
-    return () => unsubscribePortfolios();
+    return () => {
+      unsubscribePortfolios();
+      if (unsubscribeMainImage) {
+        unsubscribeMainImage();
+      }
+    };
   }, []);
 
   const handleQuoteSubmit = async (e: React.FormEvent) => {

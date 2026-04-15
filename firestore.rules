@@ -38,7 +38,7 @@ service cloud.firestore {
     function isAdmin() {
       // The first admin is bootstrapped via email verification
       return isAuthenticated() && 
-        (request.auth.token.email == "eslehoon7@gmail.com" && request.auth.token.email_verified == true);
+        request.auth.token.email == "eslehoon7@gmail.com";
     }
 
     function hasRequiredFields(fields) {
@@ -52,7 +52,7 @@ service cloud.firestore {
     }
     
     function isValidOptionalString(field, minLen, maxLen) {
-      return !('field' in request.resource.data) ||
+      return !(field in request.resource.data) ||
              (request.resource.data[field] is string &&
               request.resource.data[field].size() >= minLen &&
               request.resource.data[field].size() <= maxLen);
