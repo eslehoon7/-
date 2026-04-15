@@ -138,9 +138,8 @@ export default function AdminPage() {
       const url = await getDownloadURL(fileRef);
       
       // Update Firestore document
-      import('firebase/firestore').then(({ setDoc }) => {
-        setDoc(doc(db, 'siteConfig', 'mainImage'), { url, updatedAt: serverTimestamp() });
-      });
+      const { setDoc } = await import('firebase/firestore');
+      await setDoc(doc(db, 'siteConfig', 'mainImage'), { url, updatedAt: serverTimestamp() });
 
       setNewMainImageFile(null);
       alert("메인 이미지가 성공적으로 변경되었습니다.");
