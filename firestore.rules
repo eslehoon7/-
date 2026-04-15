@@ -77,17 +77,25 @@ service cloud.firestore {
     }
 
     function isValidPortfolio(data) {
-      return hasRequiredFields(['title', 'description', 'imageUrl', 'serviceType', 'createdAt']) &&
+      return hasRequiredFields(['title', 'description', 'serviceType', 'createdAt']) &&
              isValidString('title', 1, 200) &&
-             isValidString('description', 1, 5000) &&
-             isValidUrl(request.resource.data.imageUrl) &&
+             isValidString('description', 0, 5000) &&
              isValidString('serviceType', 1, 100) &&
-             request.resource.data.createdAt is timestamp;
+             request.resource.data.createdAt is timestamp &&
+             (!('imageUrls' in request.resource.data) || request.resource.data.imageUrls is list) &&
+             (!('imageUrl' in request.resource.data) || isValidUrl(request.resource.data.imageUrl));
     }
 
     // ===============================================================
     // Rules
     // ===============================================================
+
+    match /siteConfig/{docId} {
+      // Anyone can read site config (like main image)
+      allow read: if true;
+      // Only admin can write to site config
+      allow write: if isAdmin();
+    }
 
     match /quotes/{quoteId} {
       // Anyone can submit a quote inquiry
