@@ -78,9 +78,9 @@ export default function MainPage() {
     <div className="min-h-screen bg-white text-slate-900 font-sans selection:bg-orange-200">
       {/* Navigation */}
       <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled ? 'bg-white/70 backdrop-blur-md border-b border-slate-100' : 'bg-transparent border-b border-transparent'}`}>
-        <div className="max-w-6xl mx-auto px-6 h-[60px] flex items-center justify-between">
+        <div className="max-w-6xl mx-auto px-6 h-[80px] flex items-center justify-between">
           <a href="#" className="flex items-center gap-2">
-            <img src="/logo.png" alt="꼬마철거 로고" className="h-12 w-auto object-contain" />
+            <img src="/logo.png" alt="꼬마철거 로고" className="h-[55px] w-auto object-contain" />
           </a>
           <div className={`hidden md:flex items-center gap-8 text-base font-medium transition-colors duration-300 ${isScrolled ? 'text-slate-600' : 'text-white/90'}`}>
             <div className="relative group">

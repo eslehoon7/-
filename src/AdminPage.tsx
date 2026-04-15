@@ -61,9 +61,17 @@ export default function AdminPage() {
     try {
       const provider = new GoogleAuthProvider();
       await signInWithPopup(auth, provider);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Login failed", error);
-      alert("로그인에 실패했습니다.");
+      if (error.code === 'auth/popup-blocked') {
+        alert("팝업이 차단되었습니다. 브라우저의 팝업 차단을 해제하거나, 우측 상단의 '새 탭에서 열기' 버튼을 눌러 새 창에서 시도해주세요.");
+      } else if (error.code === 'auth/unauthorized-domain') {
+        alert("승인되지 않은 도메인입니다. Firebase 콘솔에서 이 도메인을 승인된 도메인에 추가해주세요.");
+      } else if (error.code === 'auth/popup-closed-by-user') {
+        alert("로그인 창이 닫혔습니다. 다시 시도해주세요.");
+      } else {
+        alert(`로그인에 실패했습니다. (${error.message || error.code || '알 수 없는 오류'})`);
+      }
     }
   };
 
