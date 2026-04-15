@@ -341,7 +341,7 @@ export default function AdminPage() {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">이미지 업로드 (최대 10장)</label>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">메인이미지 및 추가 사진 업로드 (첫 번째 사진이 메인)</label>
                     <input 
                       type="file" 
                       multiple

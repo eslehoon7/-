@@ -232,10 +232,6 @@ export default function MainPage() {
             {portfolios.length > 0 ? portfolios.map((portfolio) => (
               <div key={portfolio.id} className="group cursor-pointer bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-slate-100 flex flex-col">
                 <div className="relative aspect-[4/3] overflow-hidden">
-                  <div className="absolute top-4 left-4 z-20 bg-slate-900 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-md">
-                    {portfolio.serviceType}
-                  </div>
-                  <div className="absolute inset-0 bg-black/10 group-hover:bg-transparent transition-colors z-10"></div>
                   <div className="flex overflow-x-auto snap-x snap-mandatory hide-scrollbar w-full h-full">
                     {portfolio.imageUrls && portfolio.imageUrls.length > 0 ? (
                       portfolio.imageUrls.map((url: string, idx: number) => (
@@ -256,15 +252,28 @@ export default function MainPage() {
                       />
                     )}
                   </div>
+                  
+                  {/* Gradient Overlay for Text Readability */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent pointer-events-none z-10"></div>
+                  
+                  {/* Text Overlay (Service Type & Title) */}
+                  <div className="absolute bottom-0 left-0 right-0 p-6 z-20 pointer-events-none">
+                    <div className="text-orange-400 font-bold text-sm mb-1.5 drop-shadow-md">
+                      {portfolio.serviceType}
+                    </div>
+                    <h3 className="text-2xl font-extrabold text-white line-clamp-1 drop-shadow-md">
+                      {portfolio.title}
+                    </h3>
+                  </div>
+
                   {portfolio.imageUrls && portfolio.imageUrls.length > 1 && (
-                    <div className="absolute bottom-3 right-3 z-20 bg-black/60 text-white text-xs font-bold px-2 py-1 rounded-md backdrop-blur-sm">
+                    <div className="absolute top-4 right-4 z-20 bg-black/60 text-white text-xs font-bold px-3 py-1.5 rounded-full backdrop-blur-sm">
                       1 / {portfolio.imageUrls.length}
                     </div>
                   )}
                 </div>
-                <div className="p-6 flex-1 flex flex-col">
-                  <h3 className="text-xl font-bold text-slate-900 mb-3 line-clamp-1">{portfolio.title}</h3>
-                  <p className="text-slate-600 text-sm leading-relaxed mb-6 line-clamp-2 flex-1">{portfolio.description}</p>
+                <div className="p-6 flex-1 flex flex-col bg-white">
+                  <p className="text-slate-600 text-sm leading-relaxed line-clamp-3 flex-1">{portfolio.description}</p>
                 </div>
               </div>
             )) : (
